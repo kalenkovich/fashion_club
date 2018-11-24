@@ -1,1 +1,1 @@
-conda create -n fashion -c conda-forge python=3 pymc3 ipykernel
+conda create -n fashion -c conda-forge python=3.5 pymc3 ipykernel
