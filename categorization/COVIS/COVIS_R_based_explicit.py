@@ -101,10 +101,13 @@ class RuleBasedSystem(object):
         # Since 'the last one used' does not make sense on the first iteration, let's just pick one at random.
         self.current_rule = np.random.choice(self.rules, 1)[0]
         
-    def process_stimulus(self, x):
+    def process_stimulus(self, x, real_category=None):
         self.current_rule = self._select_rule()
         self.last_stimulus = x
-        self.current_prediction = self.current_rule.make_decision(x) #curent response
+        self.current_prediction = self.current_rule.make_decision(x)  # current response
+        if real_category is not None:
+            is_correct = self.process_feedback(real_category)
+            return is_correct
         
     def _select_rule(self):
         saliences = [rule.salience for rule in self.rules]

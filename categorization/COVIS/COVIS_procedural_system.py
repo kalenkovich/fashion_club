@@ -147,11 +147,13 @@ class ProceduralLearningSystem(object):
         inp_activations = self.compute_inp_activations(stimulus)
         striat_activations = self.activate_striatal_units(inp_activations)
         response = self.resp_from_striatal(striat_activations)
+        self.current_prediction = response
+        is_correct = response == real_categ
+        
         dopamine = self.compute_dopamine(response, real_categ)
+        self.update_weights(inp_activations, striat_activations, dopamine)       
         
-        self.update_weights(inp_activations, striat_activations, dopamine)
-        
-        return response
+        return is_correct
 
 
 stimuli = list(product((0, 1), repeat=4))
@@ -174,7 +176,7 @@ blocks_ii = []
 for _iter in range(n_blocks):
     block_hits = []
     for ind in random.sample(range(n_stim), n_stim):
-        block_hits.append(pl_system.process_stimulus(stimuli[ind], ii_categs[ind]) == ii_categs[ind])
+        block_hits.append(pl_system.process_stimulus(stimuli[ind], ii_categs[ind]))
     blocks_ii.append(sum(block_hits) / float(n_stim))
 
 
@@ -188,7 +190,7 @@ blocks_rb = []
 for _iter in range(n_blocks):
     block_hits = []
     for ind in random.sample(range(n_stim), n_stim):
-        block_hits.append(pl_system.process_stimulus(stimuli[ind], rb_categs[ind]) == rb_categs[ind])
+        block_hits.append(pl_system.process_stimulus(stimuli[ind], rb_categs[ind]))
     blocks_rb.append(sum(block_hits) / float(n_stim))
 
 
