@@ -41,7 +41,7 @@ class COVIS(object):
         Returns (confidence, prediction) of system
         """
         system.process_stimulus(stimulus, real_categ)
-        return 0.5, system.current_prediction
+        return system.confidence_in_prediction, system.current_prediction
         
     def process_stimulus(self, stimulus, real_categ):
         

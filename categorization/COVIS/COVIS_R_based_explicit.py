@@ -97,12 +97,17 @@ class RuleBasedSystem(object):
                                 salience=salience_init) 
                       for dim_ind in range(n_dims)]
         
+        # Confidence
+        self.confidence_in_prediction = None
+        self.max_h_E = 0
+        
         # During each iteration two rules get temporary salience bumps - the last one used and a random one.
         # Since 'the last one used' does not make sense on the first iteration, let's just pick one at random.
         self.current_rule = np.random.choice(self.rules, 1)[0]
         
     def process_stimulus(self, x, real_category=None):
         self.current_rule = self._select_rule()
+        self._update_confidence(self.current_rule.get_discriminant_value(x))
         self.last_stimulus = x
         self.current_prediction = self.current_rule.make_decision(x)  # current response
         if real_category is not None:
@@ -150,6 +155,17 @@ class RuleBasedSystem(object):
         x = self.last_stimulus
         for rule in self.rules:
             rule.update(x, feedback)
+            
+    def _update_confidence(self, discriminant_value):
+        # p. 77
+        h_E = abs(discriminant_value)
+        
+        # Normalize by the historical maximum value
+        if h_E > self.max_h_E:
+            self.max_h_E = h_E
+            self.confidence_in_prediction = h_E
+        else:
+            self.confidence_in_prediction = h_E / self.max_h_E
 
 
 rbs = RuleBasedSystem(n_dims=4, sigma_e_2=0.0, gamma=1.0, lambda_=5.0, delta_C=0.0025, 

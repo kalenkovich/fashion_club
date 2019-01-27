@@ -37,6 +37,10 @@ class ProceduralLearningSystem(object):
         self.prev_obt_r = 0.0
         self.prev_pred_r = 0.0
         
+        # Confidence
+        self.confidence_in_prediction = None
+        self.max_h_P = 0
+        
     def compute_inp_activations(self, stimulus):
         return np.array(list(map(self.compute_activation, 
                    self.inp_preferred_stimuli, 
@@ -146,6 +150,7 @@ class ProceduralLearningSystem(object):
     def process_stimulus(self, stimulus, real_categ):
         inp_activations = self.compute_inp_activations(stimulus)
         striat_activations = self.activate_striatal_units(inp_activations)
+        self._update_confidence(striat_activations)
         response = self.resp_from_striatal(striat_activations)
         self.current_prediction = response
         is_correct = response == real_categ
@@ -154,6 +159,18 @@ class ProceduralLearningSystem(object):
         self.update_weights(inp_activations, striat_activations, dopamine)       
         
         return is_correct
+    
+    def _update_confidence(self, striat_activations):
+        # p. 76, Eq. (14)
+        S_A, S_B = striat_activations
+        h_P = abs(S_A - S_B)
+        
+        # Normalize by the historical maximum value
+        if h_P > self.max_h_P:
+            self.max_h_P = h_P
+            self.confidence_in_prediction = h_P
+        else:
+            self.confidence_in_prediction = h_P / self.max_h_P
 
 
 stimuli = list(product((0, 1), repeat=4))
